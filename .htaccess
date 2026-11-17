@@ -1,0 +1,21 @@
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Redirigir index.html a index.php
+    RewriteCond %{REQUEST_URI} /home/index\.html$ [NC]
+    RewriteRule ^(.*)home/index\.html$ $1home/index.php [R=301,L]
+
+    # Redirigir main_activF.html a .php
+    RewriteCond %{REQUEST_URI} /activo_fijo/main_activF\.html$ [NC]
+    RewriteRule ^(.*)activo_fijo/main_activF\.html$ $1activo_fijo/main_activF.php [R=301,L]
+
+    # Redirigir main_productos.html a .php
+    RewriteCond %{REQUEST_URI} /productos/main_productos\.html$ [NC]
+    RewriteRule ^(.*)productos/main_productos\.html$ $1productos/main_productos.php [R=301,L]
+
+    # Redirigir main_ordenC.html a .php (nota: asegurate de que termine en .php si esa era la ruta real)
+    RewriteCond %{REQUEST_URI} /orden_compra/main_ordenC\.html$ [NC]
+    RewriteRule ^(.*)orden_compra/main_ordenC\.html$ $1orden_compra/main_ordenC.php [R=301,L]
+</IfModule>

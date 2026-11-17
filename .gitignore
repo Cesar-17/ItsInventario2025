@@ -1,0 +1,17 @@
+# Ignore local config with secrets
+/includes/config.php
+
+# Ignore OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# PHPStorm / VSCode
+.idea/
+.vscode/
+
+# Composer
+/vendor/
+
+config_microsoft.php
+/config_microsoft.php

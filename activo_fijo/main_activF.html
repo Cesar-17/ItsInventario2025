@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Activo Fijo — AlmacenaTec</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="../css/bootstrap.min.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="../css/style.css">
+  <!-- Libs -->
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.9.3/dist/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- ═══════════════════════════ SIDEBAR ═══════════════════════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="logo-mark">AT</div>
+        <div class="logo-text">
+          <span class="logo-name">AlmacenaTec</span>
+          <span class="logo-sub">TecNM Saltillo</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">Módulos</div>
+
+      <a href="../home/index.html" class="sidebar-link">
+        <i class="bi bi-house-door"></i> Inicio
+      </a>
+      <a href="../activo_fijo/main_activF.html" class="sidebar-link active">
+        <i class="bi bi-clipboard2-data"></i> Activo Fijo
+      </a>
+      <a href="../productos/main_productos.html" class="sidebar-link">
+        <i class="bi bi-box-seam"></i> Productos
+      </a>
+      <a href="../orden_compra/main_ordenC.html" class="sidebar-link">
+        <i class="bi bi-cart3"></i> Orden de Compra
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <i class="bi bi-geo-alt-fill me-1"></i> TecNM · Campus Saltillo · 2025
+    </div>
+  </aside>
+
+  <!-- Overlay móvil -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <!-- ═══════════════════════════ MAIN ═══════════════════════════ -->
+  <div class="main-wrapper" id="mainWrapper">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="topbar-toggle" onclick="toggleSidebar()" title="Menú">
+        <i class="bi bi-list" style="font-size:22px"></i>
+      </button>
+      <div class="topbar-info">
+        <h1>Activo Fijo</h1>
+        <div class="topbar-breadcrumb">
+          <a href="../home/index.html">Inicio</a>
+          &rsaquo; Activo Fijo
+        </div>
+      </div>
+      <span class="topbar-badge">
+        <i class="bi bi-geo-alt-fill me-1"></i> Campus Saltillo
+      </span>
+    </header>
+
+    <!-- Contenido principal -->
+    <main class="content">
+
+      <div class="page-header">
+        <h2>
+          <i class="bi bi-clipboard2-data me-2" style="color:var(--c-primary)"></i>
+          Historial de Salidas
+        </h2>
+        <button class="btn-primary-brand" onclick="location.href='../activo_fijo/capturarAFijo.php'">
+          <i class="bi bi-plus-lg"></i> Nueva Salida
+        </button>
+      </div>
+
+      <div class="card-panel">
+        <div class="card-panel-header">
+          <h3><i class="bi bi-table me-2" style="color:var(--c-primary)"></i>Registros de salidas</h3>
+          <div class="search-wrap" style="min-width:260px">
+            <i class="bi bi-search"></i>
+            <input type="text" id="searchItem" class="form-control"
+              placeholder="Buscar folio, proveedor, departamento…">
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="table table-striped table-hover text-center mb-0">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Folio</th>
+                <th>Fecha</th>
+                <th>Departamento</th>
+                <th>Jefe</th>
+                <th>Proveedor</th>
+                <th>Observaciones</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="productosTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Modal: detalle de salida -->
+<div class="modal fade" id="modalSalida" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-file-earmark-text me-2"></i>Detalle de salida</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body" id="modalSalidaBody"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn-primary-brand" id="btnDownloadPdf">
+          <i class="bi bi-file-earmark-pdf me-1"></i> Descargar PDF
+        </button>
+        <button type="button" class="btn-outline-brand" data-bs-dismiss="modal">
+          <i class="bi bi-x-lg me-1"></i> Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../js/bootstrap.bundle.min.js"></script>
+<script>
+  /* ── Sidebar toggle ── */
+  function toggleSidebar() {
+    const sidebar  = document.getElementById('sidebar');
+    const overlay  = document.getElementById('sidebarOverlay');
+    const wrapper  = document.getElementById('mainWrapper');
+    if (window.innerWidth <= 1100) {
+      const open = sidebar.classList.toggle('open');
+      overlay.classList.toggle('visible', open);
+    } else {
+      sidebar.classList.toggle('collapsed');
+      wrapper.classList.toggle('sidebar-hidden');
+    }
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('visible');
+  }
+
+  /* ── Helper: error div ── */
+  function getOrCreateErrorDiv() {
+    let d = document.getElementById('fetchError');
+    if (!d) {
+      d = document.createElement('div'); d.id = 'fetchError';
+      d.style.cssText = 'margin:10px 0;color:#856404;background:#fff3cd;padding:8px 12px;border-radius:6px;display:none;font-size:13px;';
+      const container = document.querySelector('.card-panel');
+      if (container) container.insertBefore(d, container.firstChild);
+    }
+    return d;
+  }
+
+  async function fetchSalidas() {
+    const errDiv = getOrCreateErrorDiv();
+    try {
+      const res  = await fetch('<?= BASE_PATH ?>includes/get_salidas.php');
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch(e) {
+        errDiv.style.display = 'block';
+        errDiv.textContent = 'Respuesta no JSON: ' + text.substring(0, 1000);
+        console.error(text); return;
+      }
+      if (!res.ok || !data.ok) {
+        errDiv.style.display = 'block';
+        errDiv.textContent = 'Error backend: ' + (data && data.error ? data.error : res.status);
+        console.error('get_salidas error', res.status, data); return;
+      }
+      errDiv.style.display = 'none';
+      window._salidas = data.salidas || [];
+      renderSalidas(window._salidas);
+    } catch(err) {
+      console.error(err);
+      const d = getOrCreateErrorDiv();
+      d.style.display = 'block';
+      d.textContent = 'Error al obtener salidas: ' + (err && err.message ? err.message : String(err));
+    }
+  }
+
+  function getJefeName(obj) {
+    if (!obj) return '';
+    return obj.jefe_nombre || obj.jefe || obj.jefe_name || (obj.jefe_id ? ('ID:' + obj.jefe_id) : '') || '';
+  }
+
+  function renderSalidas(rows) {
+    const tbody = document.getElementById('productosTableBody');
+    tbody.innerHTML = '';
+    if (!rows || rows.length === 0) {
+      const d = getOrCreateErrorDiv();
+      d.style.display = 'block';
+      d.textContent = 'No hay registros de salidas para mostrar.';
+      return;
+    }
+    for (const s of rows) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><span style="font-weight:600;color:var(--c-primary)">${s.id}</span></td>
+        <td><span style="font-family:var(--font-brand);font-weight:600">${s.folio || ''}</span></td>
+        <td><small style="color:var(--c-text-md)">${s.fecha || ''}</small></td>
+        <td>${s.departamento || ''}</td>
+        <td>${getJefeName(s)}</td>
+        <td>${s.proveedor || ''}</td>
+        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.observaciones || ''}</td>
+        <td>
+          <button class="btn-tbl-view" onclick="viewSalida(${s.id})">
+            <i class="bi bi-eye"></i> Ver
+          </button>
+        </td>`;
+      tbody.appendChild(tr);
+    }
+  }
+
+  function viewSalida(id) {
+    const s = (window._salidas || []).find(x => x.id == id);
+    if (!s) return alert('Salida no encontrada');
+    const body = document.getElementById('modalSalidaBody');
+    let html = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <div style="background:#f8faff;padding:12px 14px;border-radius:8px;border-left:3px solid var(--c-primary)">
+          <div style="font-size:11px;font-weight:700;color:var(--c-text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Folio</div>
+          <div style="font-weight:700;font-size:16px;color:var(--c-primary)">${s.folio || '—'}</div>
+        </div>
+        <div style="background:#f8faff;padding:12px 14px;border-radius:8px;border-left:3px solid var(--c-gold)">
+          <div style="font-size:11px;font-weight:700;color:var(--c-text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Fecha</div>
+          <div style="font-weight:600;font-size:15px">${s.fecha || '—'}</div>
+        </div>
+      </div>
+      <table style="width:100%;font-size:13px;margin-bottom:12px">
+        <tr><td style="padding:5px 0;color:var(--c-text-muted);width:140px">Departamento</td><td style="font-weight:600">${s.departamento || '—'}</td></tr>
+        <tr><td style="padding:5px 0;color:var(--c-text-muted)">Jefe</td><td style="font-weight:600">${getJefeName(s) || '—'}</td></tr>
+        <tr><td style="padding:5px 0;color:var(--c-text-muted)">Proveedor</td><td>${s.proveedor || '—'}</td></tr>
+        <tr><td style="padding:5px 0;color:var(--c-text-muted)">Observaciones</td><td>${s.observaciones || '—'}</td></tr>
+      </table>`;
+    if (s.detalles && s.detalles.length) {
+      html += `<hr style="border-color:var(--c-border)"><h6 style="font-weight:700;margin-bottom:8px"><i class="bi bi-list-ul me-1"></i>Detalles</h6>
+        <div style="overflow-x:auto"><table class="table table-sm table-striped">
+          <thead><tr><th>Producto</th><th>Descripción</th><th>Cantidad</th><th>Unidad</th><th>Importe</th></tr></thead><tbody>`;
+      for (const d of s.detalles) {
+        html += `<tr><td>${d.producto_id ? (d.codigo_barras || d.producto_id) : ''}</td><td>${d.descripcion || ''}</td><td>${d.cantidad || ''}</td><td>${d.unidad || ''}</td><td>${d.importe || ''}</td></tr>`;
+      }
+      html += `</tbody></table></div>`;
+    }
+    body.innerHTML = html;
+    var modal = new bootstrap.Modal(document.getElementById('modalSalida'));
+    modal.show();
+
+    const downloadBtn = document.getElementById('btnDownloadPdf');
+    if (downloadBtn) {
+      downloadBtn.onclick = async function() {
+        const folioSafe = (s.folio || 'salida').replace(/[^a-z0-9-_]/gi, '_');
+        const filename  = `salida_${folioSafe}_${s.fecha || ''}.pdf`;
+        const pdfEl = document.createElement('div');
+        pdfEl.style.cssText = 'font-family:Arial,Helvetica,sans-serif;color:#222;position:relative;min-height:297mm;padding:20mm;box-sizing:border-box;';
+        pdfEl.innerHTML = `<img src="../media/hoja_membretada_final.jpg" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:-1;" />
+<div style="background:rgba(255,255,255,.9);padding:10mm;border-radius:5px;margin-top:60mm;">
+  <div style="text-align:center;margin-bottom:12px">
+    <h2 style="margin:0;color:#0B2D6B">AlmacenaTec</h2>
+    <div style="font-size:12px;color:#666">Salida de Activo Fijo — TecNM Campus Saltillo</div>
+    <div style="margin-top:10px;font-size:13px;color:#333"><strong>Folio:</strong> ${s.folio || ''} &nbsp;·&nbsp; <strong>Fecha:</strong> ${s.fecha || ''}</div>
+    <hr style="border:none;border-top:1px solid #ddd;margin:10px 0">
+  </div>`;
+        pdfEl.innerHTML += `<div style="margin-bottom:8px;display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:#333">
+  <div><strong>Departamento:</strong> ${s.departamento || ''}</div>
+  <div><strong>Jefe:</strong> ${getJefeName(s)}</div>
+</div>`;
+        if (s.detalles && s.detalles.length) {
+          let rows = '';
+          for (const d of s.detalles) {
+            rows += `<tr style="border-bottom:1px solid #eee"><td style="padding:6px">${d.producto_id ? (d.codigo_barras || d.producto_id) : ''}</td><td style="padding:6px">${d.descripcion || ''}</td><td style="padding:6px;text-align:right">${d.cantidad || ''}</td><td style="padding:6px">${d.unidad || ''}</td><td style="padding:6px;text-align:right">${d.importe || ''}</td></tr>`;
+          }
+          pdfEl.innerHTML += `<table style="width:100%;border-collapse:collapse;margin-top:10px;font-size:13px">
+<thead><tr style="background:#0B2D6B;color:#fff">
+  <th style="padding:8px">Producto</th><th style="padding:8px">Descripción</th>
+  <th style="padding:8px;text-align:right">Cantidad</th><th style="padding:8px">Unidad</th>
+  <th style="padding:8px;text-align:right">Importe</th>
+</tr></thead><tbody>${rows}</tbody></table>`;
+        }
+        pdfEl.innerHTML += '</div>';
+        try {
+          if (typeof html2pdf !== 'undefined') {
+            const opt = { margin: 10, filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: false, allowTaint: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+            await html2pdf().set(opt).from(pdfEl).save(); return;
+          }
+        } catch(err) { console.error('html2pdf failed', err); }
+        const w = window.open('', '_blank');
+        const estilo = '<style>body{font-family:Arial,Helvetica,sans-serif;margin:20px}table{width:100%;border-collapse:collapse;margin-top:10px}th,td{border:1px solid #444;padding:6px;text-align:left}h2{margin:0}</style>';
+        let printable = '<!doctype html><html><head><meta charset="utf-8"><title>' + filename + '</title>' + estilo + '</head><body>' + pdfEl.innerHTML;
+        printable += '<script>setTimeout(function(){ window.print(); }, 250);</' + 'script>';
+        printable += '</body></html>';
+        w.document.open(); w.document.write(printable); w.document.close();
+      };
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    fetchSalidas();
+    const s = document.getElementById('searchItem');
+    if (s) {
+      s.addEventListener('input', function() {
+        const q = this.value.toLowerCase().trim();
+        if (!q) return renderSalidas(window._salidas || []);
+        const filtered = (window._salidas || []).filter(x =>
+          (x.folio || '').toLowerCase().includes(q) ||
+          (x.proveedor || '').toLowerCase().includes(q) ||
+          (x.departamento || '').toLowerCase().includes(q)
+        );
+        renderSalidas(filtered);
+      });
+    }
+    window.addEventListener('error', function(ev) {
+      try { const d = getOrCreateErrorDiv(); d.style.display = 'block'; d.textContent = 'Error JS: ' + (ev.message || ev.error || 'unknown'); } catch(e) {}
+    });
+    window.addEventListener('unhandledrejection', function(ev) {
+      try { const d = getOrCreateErrorDiv(); d.style.display = 'block'; d.textContent = 'Unhandled Rejection: ' + (ev.reason && ev.reason.message ? ev.reason.message : String(ev.reason)); } catch(e) {}
+    });
+  });
+</script>
+</body>
+</html>

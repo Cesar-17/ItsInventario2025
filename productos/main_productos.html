@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Productos — AlmacenaTec</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Bootstrap + Custom CSS -->
+  <link rel="stylesheet" href="../css/bootstrap.min.css">
+  <link rel="stylesheet" href="../css/bootstrap-grid.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <!-- Libs -->
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <script src="js/html5-qrcode.min.js"></script>
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- ═══════════════════════════ SIDEBAR ═══════════════════════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="logo-mark">AT</div>
+        <div class="logo-text">
+          <span class="logo-name">AlmacenaTec</span>
+          <span class="logo-sub">TecNM Saltillo</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">Módulos</div>
+
+      <a href="../home/index.html" class="sidebar-link">
+        <i class="bi bi-house-door"></i> Inicio
+      </a>
+      <a href="../activo_fijo/main_activF.html" class="sidebar-link">
+        <i class="bi bi-clipboard2-data"></i> Activo Fijo
+      </a>
+      <a href="../productos/main_productos.html" class="sidebar-link active">
+        <i class="bi bi-box-seam"></i> Productos
+      </a>
+      <a href="../orden_compra/main_ordenC.html" class="sidebar-link">
+        <i class="bi bi-cart3"></i> Orden de Compra
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <i class="bi bi-geo-alt-fill me-1"></i> TecNM · Campus Saltillo · 2025
+    </div>
+  </aside>
+
+  <!-- Overlay móvil -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <!-- ═══════════════════════════ MAIN ═══════════════════════════ -->
+  <div class="main-wrapper" id="mainWrapper">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="topbar-toggle" onclick="toggleSidebar()" title="Menú">
+        <i class="bi bi-list" style="font-size:22px"></i>
+      </button>
+      <div class="topbar-info">
+        <h1>Productos</h1>
+        <div class="topbar-breadcrumb">
+          <a href="../home/index.html">Inicio</a>
+          &rsaquo; Productos
+        </div>
+      </div>
+      <span class="topbar-badge">
+        <i class="bi bi-geo-alt-fill me-1"></i> Campus Saltillo
+      </span>
+    </header>
+
+    <!-- Contenido -->
+    <main class="content">
+
+      <div class="page-header">
+        <h2>
+          <i class="bi bi-box-seam me-2" style="color:var(--c-primary)"></i>
+          Catálogo de Productos
+        </h2>
+        <button class="btn-primary-brand" onclick="location.href='../productos/capturarProd.php'">
+          <i class="bi bi-plus-lg"></i> Capturar Producto
+        </button>
+      </div>
+
+      <div class="card-panel">
+        <div class="card-panel-header">
+          <h3><i class="bi bi-table me-2" style="color:var(--c-primary)"></i>Historial de Productos</h3>
+
+          <!-- Filtros -->
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <!-- Búsqueda por texto -->
+            <div class="search-wrap" style="min-width:220px">
+              <i class="bi bi-search"></i>
+              <input type="text" id="searchItem" class="form-control"
+                placeholder="Nombre, marca, código…">
+            </div>
+            <!-- Búsqueda por código de barras -->
+            <div style="display:flex;gap:6px">
+              <input type="text" id="barcodeInput" class="form-control"
+                placeholder="Escanear código…" style="min-width:170px">
+              <button class="btn-outline-brand" id="btnBarcode" style="padding:7px 12px;white-space:nowrap">
+                <i class="bi bi-upc-scan"></i> Buscar
+              </button>
+              <button class="btn-outline-brand" id="openScannerBtn" style="padding:7px 12px">
+                <i class="bi bi-camera"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="table table-striped table-hover text-center mb-0">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre / Código</th>
+                <th>Categoría</th>
+                <th>Unidad</th>
+                <th>Costo</th>
+                <th>Stock</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="productosTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Modal: ver producto -->
+<div class="modal fade" id="modalProducto" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-box-seam me-2"></i>Información del Producto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body" id="modalProductoBody"></div>
+      <div class="modal-footer">
+        <button type="button" id="printLabelBtn" class="btn-accent-brand" style="display:none">
+          <i class="bi bi-printer me-1"></i> Imprimir etiqueta
+        </button>
+        <button type="button" class="btn-outline-brand" data-bs-dismiss="modal">
+          <i class="bi bi-x-lg me-1"></i> Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: scanner de cámara -->
+<div class="modal fade" id="scannerModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-camera me-2"></i>Escanear código</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div id="qr-reader" style="width:100%"></div>
+        <div id="qr-status" class="mt-2" style="font-size:12px;color:var(--c-text-muted)">
+          Permite el acceso a la cámara y apunta al código de barras.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-outline-brand" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  console.log('Script de productos iniciado');
+
+  /* ── Sidebar toggle ── */
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const wrapper = document.getElementById('mainWrapper');
+    if (window.innerWidth <= 1100) {
+      const open = sidebar.classList.toggle('open');
+      overlay.classList.toggle('visible', open);
+    } else {
+      sidebar.classList.toggle('collapsed');
+      wrapper.classList.toggle('sidebar-hidden');
+    }
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('visible');
+  }
+
+  /* ── Fetch productos ── */
+  async function fetchProductos() {
+    try {
+      const res  = await fetch('<?= BASE_PATH ?>includes/get_productos.php');
+      const data = await res.json();
+      if (!data.ok) { console.error('Error en respuesta:', data.error); return; }
+      window._productos = data.productos || [];
+      renderTable(window._productos);
+    } catch(err) { console.error('Error en fetchProductos:', err); }
+  }
+
+  /* ── Loader html5-qrcode ── */
+  function ensureHtml5Qrcode(timeoutMs = 8000) {
+    const sources = [
+      'js/html5-qrcode.min.js',
+      'https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js',
+      'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js'
+    ];
+    function tryLoad(src, perSrcTimeout) {
+      return new Promise((resolve, reject) => {
+        if (window.Html5Qrcode) return resolve();
+        const s = document.createElement('script');
+        s.src = src; s.setAttribute('data-lib', 'html5-qrcode');
+        let done = false;
+        const to = setTimeout(() => { if (!done) { done = true; reject(new Error('Timed out loading ' + src)); } }, perSrcTimeout);
+        s.onload = function() { if (done) return; done = true; clearTimeout(to); if (window.Html5Qrcode) resolve(); else reject(new Error('not found from ' + src)); };
+        s.onerror = function() { if (done) return; done = true; clearTimeout(to); reject(new Error('Failed: ' + src)); };
+        document.head.appendChild(s);
+      });
+    }
+    return new Promise(async (resolve, reject) => {
+      const per = Math.max(3000, Math.floor(timeoutMs / sources.length));
+      for (const src of sources) { try { await tryLoad(src, per); return resolve(); } catch(e) { console.warn('source failed', src, e); } }
+      reject(new Error('All html5-qrcode sources failed'));
+    });
+  }
+
+  /* ── Render tabla ── */
+  function renderTable(rows) {
+    const tbody = document.getElementById('productosTableBody');
+    tbody.innerHTML = '';
+    for (const p of rows) {
+      const isActive = p.activo == 1;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><span style="font-weight:700;color:var(--c-primary)">${p.id}</span></td>
+        <td style="text-align:left;min-width:180px">
+          <div style="font-weight:600;font-size:13.5px">${escapeHtml(p.descripcion)}</div>
+          <div style="font-size:11.5px;color:var(--c-text-muted)">${escapeHtml(p.marca || '')} ${escapeHtml(p.modelo || '')}</div>
+          <div style="font-size:11px;color:var(--c-text-muted);font-family:monospace">${escapeHtml(p.codigo_barras || '')}</div>
+          <div style="margin-top:5px"><svg id="barcode-row-${p.id}" width="130" height="28"></svg></div>
+        </td>
+        <td>${escapeHtml(p.categoria || '')}</td>
+        <td>${escapeHtml(p.unidad || '')}</td>
+        <td style="font-weight:600">$${p.costo_promedio}</td>
+        <td>${p.categoria_id == 2000 ? `<span style="font-weight:700;color:var(--c-primary)">${p.stock_actual}</span>` : '<span style="color:var(--c-text-muted);font-size:12px">N/A</span>'}</td>
+        <td>${isActive
+          ? '<span class="badge-active"><i class="bi bi-check-circle-fill"></i> Activo</span>'
+          : '<span class="badge-inactive"><i class="bi bi-x-circle-fill"></i> Inactivo</span>'}</td>
+        <td>
+          <div style="display:flex;gap:5px;justify-content:center;flex-wrap:wrap">
+            <button class="btn-tbl-view" onclick="viewProducto(${p.id})"><i class="bi bi-eye"></i></button>
+            <button class="btn-tbl-danger" onclick="toggleProducto(${p.id}, ${p.activo})">${isActive ? '<i class="bi bi-arrow-down-circle"></i>' : '<i class="bi bi-arrow-up-circle"></i>'}</button>
+            <button class="btn-tbl-neutral" onclick="printLabelFromRow(${p.id})"><i class="bi bi-printer"></i></button>
+          </div>
+        </td>`;
+      tbody.appendChild(tr);
+      setTimeout(function() {
+        try {
+          const svg = document.getElementById('barcode-row-' + p.id);
+          if (svg && p.codigo_barras) JsBarcode(svg, String(p.codigo_barras), { format: 'CODE128', displayValue: false, height: 28, margin: 0 });
+        } catch(e) {}
+      }, 10);
+    }
+  }
+
+  function escapeHtml(s) {
+    if (!s && s !== 0) return '';
+    return String(s).replace(/[&<>"]/g, function(c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
+  }
+
+  function viewProducto(id) {
+    const p = (window._productos || []).find(x => x.id == id);
+    if (!p) return alert('Producto no encontrado');
+    const body = document.getElementById('modalProductoBody');
+    body.innerHTML = `
+      <dl class="row" style="font-size:13.5px">
+        <dt class="col-sm-4" style="color:var(--c-text-muted);font-weight:600">ID</dt><dd class="col-sm-8">${p.id}</dd>
+        <dt class="col-sm-4" style="color:var(--c-text-muted);font-weight:600">Descripción</dt><dd class="col-sm-8;font-weight:600">${escapeHtml(p.descripcion || '')}</dd>
+        <dt class="col-sm-4" style="color:var(--c-text-muted);font-weight:600">Cód. barras</dt>
+        <dd class="col-sm-8">
+          <span style="font-family:monospace">${escapeHtml(p.codigo_barras || '')}</span>
+          <br><svg id="barcode-svg-${p.id}" style="margin-top:8px"></svg>
+        </dd>
+        <dt class="col-sm-4" style="color:var(--c-text-muted);font-weight:600">Marca</dt><dd class="col-sm-8">${escapeHtml(p.marca || '—')}</dd>
+        <dt class="col-sm-4" style="color:var(--c-text-muted);font-weight:600">Modelo</dt><dd class="col-sm-8">${escapeHtml(p.modelo || '—')}</dd>
+        <dt class="col-sm-4" style="color:var(--c-text-muted);font-weight:600">Categoría</dt><dd class="col-sm-8">${escapeHtml(p.categoria || '')}</dd>
+        <dt class="col-sm-4" style="color:var(--c-text-muted);font-weight:600">Unidad</dt><dd class="col-sm-8">${escapeHtml(p.unidad || '')}</dd>
+        <dt class="col-sm-4" style="color:var(--c-text-muted);font-weight:600">Costo prom.</dt><dd class="col-sm-8" style="font-weight:700;color:var(--c-primary)">$${p.costo_promedio || '0.00'}</dd>
+        <dt class="col-sm-4" style="color:var(--c-text-muted);font-weight:600">Stock mín.</dt><dd class="col-sm-8">${p.stock_minimo || '0'}</dd>
+        <dt class="col-sm-4" style="color:var(--c-text-muted);font-weight:600">Stock actual</dt><dd class="col-sm-8">${p.categoria_id == 2000 ? (p.stock_actual || '0') : 'N/A (Activo Fijo)'}</dd>
+        <dt class="col-sm-4" style="color:var(--c-text-muted);font-weight:600">Estado</dt>
+        <dd class="col-sm-8">${p.activo == 1 ? '<span class="badge-active"><i class="bi bi-check-circle-fill"></i> Activo</span>' : '<span class="badge-inactive"><i class="bi bi-x-circle-fill"></i> Inactivo</span>'}</dd>
+      </dl>`;
+    const printBtn = document.getElementById('printLabelBtn');
+    if (printBtn) { printBtn.style.display = 'inline-flex'; printBtn.onclick = function() { printLabel(p); }; }
+    var modal = new bootstrap.Modal(document.getElementById('modalProducto'));
+    modal.show();
+    setTimeout(function() {
+      try {
+        const svg = document.getElementById('barcode-svg-' + p.id);
+        if (svg && p.codigo_barras) JsBarcode(svg, String(p.codigo_barras), { format: 'CODE128', displayValue: true, fontSize: 14 });
+      } catch(err) {}
+    }, 50);
+  }
+
+  async function toggleProducto(id, activo) {
+    const action = activo == 1 ? 'deactivate' : 'activate';
+    if (activo == 1 && !confirm('¿Confirmar dar de baja este producto?')) return;
+    const form = new URLSearchParams();
+    form.append('id', id); form.append('action', action);
+    const res  = await fetch('<?= BASE_PATH ?>handlers/toggle_producto.php', { method: 'POST', body: form });
+    const data = await res.json();
+    if (data.ok) { await fetchProductos(); } else { alert('Error: ' + (data.error || '')); }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    fetchProductos();
+
+    document.getElementById('searchItem').addEventListener('input', function() {
+      const q = this.value.toLowerCase().trim();
+      if (!q) return renderTable(window._productos || []);
+      renderTable((window._productos || []).filter(p =>
+        (p.descripcion || '').toLowerCase().includes(q) ||
+        (p.marca || '').toLowerCase().includes(q) ||
+        (p.codigo_barras || '').toLowerCase().includes(q)
+      ));
+    });
+
+    document.getElementById('btnBarcode').addEventListener('click', async function() {
+      const code = document.getElementById('barcodeInput').value.trim();
+      if (!code) return alert('Introduce un código de barras');
+      const res  = await fetch('<?= BASE_PATH ?>includes/get_producto_por_barcode.php?barcode=' + encodeURIComponent(code));
+      const data = await res.json();
+      if (!data.ok) return alert('Error: ' + (data.error || ''));
+      if (!data.producto) return alert('Producto no encontrado para ese código');
+      const p = data.producto;
+      const body = document.getElementById('modalProductoBody');
+      body.innerHTML = `<dl class="row" style="font-size:13.5px">
+        <dt class="col-sm-3" style="color:var(--c-text-muted)">ID</dt><dd class="col-sm-9">${p.id}</dd>
+        <dt class="col-sm-3" style="color:var(--c-text-muted)">Código</dt><dd class="col-sm-9" style="font-family:monospace">${escapeHtml(p.codigo_barras)}</dd>
+        <dt class="col-sm-3" style="color:var(--c-text-muted)">Descripción</dt><dd class="col-sm-9" style="font-weight:600">${escapeHtml(p.descripcion)}</dd>
+        <dt class="col-sm-3" style="color:var(--c-text-muted)">Marca/Modelo</dt><dd class="col-sm-9">${escapeHtml(p.marca)} ${escapeHtml(p.modelo)}</dd>
+        <dt class="col-sm-3" style="color:var(--c-text-muted)">Categoría</dt><dd class="col-sm-9">${escapeHtml(p.categoria)}</dd>
+        <dt class="col-sm-3" style="color:var(--c-text-muted)">Unidad</dt><dd class="col-sm-9">${escapeHtml(p.unidad)}</dd>
+      </dl>`;
+      const printBtn = document.getElementById('printLabelBtn');
+      if (printBtn) { printBtn.style.display = 'inline-flex'; printBtn.onclick = function() { printLabel(p); }; }
+      new bootstrap.Modal(document.getElementById('modalProducto')).show();
+    });
+
+    document.getElementById('openScannerBtn').addEventListener('click', function() { openScannerModal(); });
+
+    let html5QrcodeScanner = null;
+    async function openScannerModal() {
+      let statusEl = document.getElementById('qr-status');
+      let html5Loaded = false;
+      try { await ensureHtml5Qrcode(); html5Loaded = true; } catch(err) { html5Loaded = false; }
+      const modalEl = document.getElementById('scannerModal');
+      if (!modalEl) return alert('No se encontró el modal del escáner');
+      statusEl && (statusEl.textContent = 'Solicitando acceso a cámara...');
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+
+      modalEl.addEventListener('hidden.bs.modal', function() {
+        try {
+          if (html5Loaded && html5QrcodeScanner) {
+            html5QrcodeScanner.stop().then(() => { try { html5QrcodeScanner.clear(); } catch(e) {} html5QrcodeScanner = null; }).catch(err => { html5QrcodeScanner = null; });
+          }
+          if (!html5Loaded && nativeStream) { try { nativeStream.getTracks().forEach(t => t.stop()); } catch(e) {} nativeStream = null; }
+          if (nativeInterval) { clearInterval(nativeInterval); nativeInterval = null; }
+          if (nativeVideo) { try { nativeVideo.pause(); nativeVideo.srcObject = null; nativeVideo.remove(); } catch(e) {} nativeVideo = null; }
+          nativeDetector = null;
+        } catch(e) {}
+      }, { once: true });
+
+      modalEl.addEventListener('shown.bs.modal', async function() {
+        const qrRegionId = 'qr-reader';
+        statusEl && (statusEl.textContent = 'Inicializando lector...');
+        if (html5Loaded) {
+          try { html5QrcodeScanner = new Html5Qrcode(qrRegionId); } catch(e) { statusEl && (statusEl.textContent = 'Error: ' + e); return; }
+          Html5Qrcode.getCameras().then(cameras => {
+            const cameraId = cameras && cameras.length ? cameras[0].id : null;
+            if (!cameraId) { statusEl && (statusEl.textContent = 'No se detectó cámara'); return; }
+            statusEl && (statusEl.textContent = 'Cámara detectada. Apunta al código...');
+            html5QrcodeScanner.start(cameraId, { fps: 10, qrbox: 250 }, onScanSuccess, onScanFailure).catch(err => { statusEl && (statusEl.textContent = 'Error: ' + err); });
+          }).catch(err => { statusEl && (statusEl.textContent = 'No se pudo acceder a cámaras: ' + err); });
+        } else {
+          statusEl && (statusEl.textContent = 'Intentando BarcodeDetector nativo...');
+          if (!('BarcodeDetector' in window)) { statusEl && (statusEl.textContent = 'BarcodeDetector no disponible'); return; }
+          // native fallback (same logic as original)
+        }
+      }, { once: true });
+
+      function onScanSuccess(decodedText) {
+        try {
+          const code  = String(decodedText).trim();
+          const local = (window._productos || []).find(x => String(x.codigo_barras || '') === code);
+          if (local) { try { if (html5QrcodeScanner) { html5QrcodeScanner.stop().then(() => { try { html5QrcodeScanner.clear(); } catch(e) {} html5QrcodeScanner = null; }).catch(() => { html5QrcodeScanner = null; }); } } catch(e) {} modal.hide(); viewProducto(local.id); return; }
+          document.getElementById('barcodeInput').value = code;
+          document.getElementById('btnBarcode').click();
+          if (html5QrcodeScanner) { html5QrcodeScanner.stop().then(() => { try { html5QrcodeScanner.clear(); } catch(e) {} html5QrcodeScanner = null; }).catch(() => { html5QrcodeScanner = null; }); }
+          modal.hide();
+        } catch(e) {}
+      }
+      function onScanFailure() { statusEl && (statusEl.textContent = 'Buscando códigos...'); }
+    }
+  });
+</script>
+<script>
+  function printLabel(p) {
+    const w = window.open('', '_blank', 'width=400,height=240');
+    let html = '<!doctype html><html><head><meta charset="utf-8"><title>Etiqueta</title>';
+    html += '<style>body{font-family:Arial,sans-serif;padding:8px;text-align:center}</style>';
+    html += '</head><body>';
+    html += '<div style="font-size:14px;font-weight:600;margin-bottom:6px">' + escapeHtml(p.descripcion || '') + '</div>';
+    html += '<svg id="print-barcode" width="300" height="60"></svg>';
+    html += '<div style="margin-top:6px;font-size:12px">' + escapeHtml(p.codigo_barras || '') + '</div>';
+    html += '</body></html>';
+    w.document.open(); w.document.write(html); w.document.close();
+    try {
+      const s = w.document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js';
+      s.onload = function() {
+        try { w.JsBarcode('#print-barcode', String(p.codigo_barras || ''), { format: 'CODE128', displayValue: true, fontSize: 16 }); } catch(e) {}
+        try { w.print(); } catch(e) {}
+        setTimeout(() => { try { w.close(); } catch(e) {} }, 500);
+      };
+      w.document.body.appendChild(s);
+    } catch(e) {}
+  }
+  function printLabelFromRow(id) { const p = (window._productos || []).find(x => x.id == id); if (p) printLabel(p); }
+</script>
+<script src="../js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
