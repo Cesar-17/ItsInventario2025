@@ -1,17 +1,29 @@
 <?php
+// includes/auth.php
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-// includes/auth.php
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 1. Detección automática de la ruta base (Local vs Internet)
+// ============================================================
+// DETECCIÓN DE RUTA BASE (Local vs Internet)
+// ============================================================
 $isLocal = ($_SERVER['HTTP_HOST'] === 'localhost' || $_SERVER['HTTP_HOST'] === '127.0.0.1');
-define('BASE_PATH', $isLocal ? '/ItsInventario2025/' : '/');
+
+if ($isLocal) {
+    // En XAMPP
+    define('BASE_PATH', '/ItsInventario2025/');
+} else {
+    // En internet (subirlo de raíz del dominio)
+    define('BASE_PATH', '/'); 
+}
 
 $pagina_actual = basename($_SERVER['PHP_SELF']);
+
+
 
 // IMPORTANTE: Si NO hay sesión, pero estamos en el login, 
 // dejamos que cargue el login en lugar de crear un bucle infinito.
@@ -168,8 +180,6 @@ if ($rol === 'almacen_general') {
         }
     }
 }
-
-
 
 // 6. MANTENIMIENTO
 if ($rol === 'mantenimiento') {

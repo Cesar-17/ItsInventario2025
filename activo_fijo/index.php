@@ -411,20 +411,25 @@ $soloProductos = in_array($rol, $rolesRestringidos);
     let todosLosMovimientos = [];
     let filtroMovimientos = 'todos';
 
-    async function fetchMovimientos() {
-        const errDiv = getOrCreateErrorDiv('movimientosTableBody');
-        try {
-            const res = await fetch('<?= BASE_PATH ?>includes/get_activos_movimientos.php');
-            const data = await res.json();
-            if (!data.ok) throw new Error(data.error || 'Error desconocido');
-            if (errDiv) errDiv.style.display = 'none';
-            todosLosMovimientos = data.activos || [];
-            renderMovimientos(todosLosMovimientos);
-        } catch(err) {
-            if (errDiv) { errDiv.style.display = 'block'; errDiv.textContent = 'Error: ' + err.message; }
+  async function fetchMovimientos() {
+    const errDiv = getOrCreateErrorDiv('movimientosTableBody');
+    try {
+        // 🔥 ESTA ES LA RUTA CORRECTA 🔥
+        const res = await fetch('<?= BASE_PATH ?>includes/get_activos_movimientos.php');
+        const data = await res.json();
+        
+        if (!data.ok) throw new Error(data.error || 'Error desconocido');
+        if (errDiv) errDiv.style.display = 'none';
+        
+        todosLosMovimientos = data.activos || [];
+        renderMovimientos(todosLosMovimientos);
+    } catch(err) {
+        if (errDiv) { 
+            errDiv.style.display = 'block'; 
+            errDiv.textContent = 'Error: ' + err.message; 
         }
     }
-
+}
     function renderMovimientos(rows) {
         const tbody = document.getElementById('movimientosTableBody');
         tbody.innerHTML = '';
