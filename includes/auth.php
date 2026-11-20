@@ -9,21 +9,19 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // ============================================================
-// DETECCIÓN DE RUTA BASE (Local vs Internet)
+// DETECCIÓN AUTOMÁTICA DE RUTA BASE (Local, IP Móvil o Internet)
 // ============================================================
-$isLocal = ($_SERVER['HTTP_HOST'] === 'localhost' || $_SERVER['HTTP_HOST'] === '127.0.0.1');
+$docRoot = str_replace('\\', '/', realpath($_SERVER['DOCUMENT_ROOT'] ?? '') ?: '');
+$projectRoot = str_replace('\\', '/', realpath(dirname(__DIR__)) ?: '');
 
-if ($isLocal) {
-    // En XAMPP
-    define('BASE_PATH', '/ItsInventario2025/');
+if ($docRoot !== '' && strpos($projectRoot, $docRoot) === 0) {
+    $subPath = trim(substr($projectRoot, strlen($docRoot)), '/');
+    define('BASE_PATH', $subPath === '' ? '/' : '/' . $subPath . '/');
 } else {
-    // En internet (subirlo de raíz del dominio)
-    define('BASE_PATH', '/'); 
+    define('BASE_PATH', '/');
 }
 
 $pagina_actual = basename($_SERVER['PHP_SELF']);
-
-
 
 // IMPORTANTE: Si NO hay sesión, pero estamos en el login, 
 // dejamos que cargue el login en lugar de crear un bucle infinito.
