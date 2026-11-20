@@ -1,5 +1,5 @@
 <?php
-// includes/config_microsoft.sample.php
+// config_microsoft.sample.php
 // Copy this file to config_microsoft.php and fill in your Azure credentials.
 
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";

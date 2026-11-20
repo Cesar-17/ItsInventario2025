@@ -183,7 +183,7 @@ if ($rol === 'almacen_general') {
 
 // 6. MANTENIMIENTO
 if ($rol === 'mantenimiento') {
-    $paginasPermitidas = ['main_productos.php', 'capturarProd.php', 'vale_material.php', 'vale_herramienta.php', 'listar_vales.php', 'home/index.php', 'index.php', 'logout.php'];
+    $paginasPermitidas = ['main_productos.php', 'capturarProd.php', 'vale_material.php', 'vale_herramienta.php', 'listar_vales.php', 'home/index.php', 'index.php', 'logout.php', 'save_producto.php', 'save_vale_herramienta.php', 'save_vale.php']; 
     $permitido = false;
     foreach ($paginasPermitidas as $pagina) {
         if (strpos($rutaActual, $pagina) !== false) { $permitido = true; break; }
